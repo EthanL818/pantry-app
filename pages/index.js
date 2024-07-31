@@ -20,10 +20,13 @@ import {
   CardMedia,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import SaveIcon from "@mui/icons-material/Save";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
+import CancelIcon from "@mui/icons-material/Cancel";
 import { firestore } from "../firebase";
 import {
   collection,
@@ -35,6 +38,7 @@ import {
   getDoc,
 } from "firebase/firestore";
 import ReactMarkdown from "react-markdown";
+import IngredientCard from "../components/IngredientCard";
 
 const StyledModal = styled(Modal)(({ theme }) => ({
   display: "flex",
@@ -56,7 +60,6 @@ const ModalContent = styled(Paper)(({ theme }) => ({
 const StyledCard = styled(Card)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
-  justifyContent: "space-between",
   height: "100%",
   backgroundColor: theme.palette.grey[100],
 }));
@@ -84,6 +87,9 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [ingredientImage, setIngredientImage] = useState({});
+  const [editItem, setEditItem] = useState(null);
+  const [newItemName, setNewItemName] = useState("");
+  const [newItemQuantity, setNewItemQuantity] = useState(1);
 
   const updatePantry = async () => {
     const q = query(collection(firestore, "pantry"));
@@ -91,27 +97,36 @@ export default function Home() {
     const pantryList = [];
 
     querySnapshot.forEach((doc) => {
-      pantryList.push({ name: doc.id, ...doc.data() });
+      const data = doc.data();
+      pantryList.push({
+        name: doc.id,
+        count: data.count,
+        imageUrl: data.imageUrl,
+      });
     });
 
     setPantry(pantryList);
   };
 
-  const addItem = async (item) => {
-    if (!item.trim()) return;
-    const docRef = doc(collection(firestore, "pantry"), item.toLowerCase());
+  const addItem = async () => {
+    if (!newItemName.trim()) return;
+    const docRef = doc(
+      collection(firestore, "pantry"),
+      newItemName.toLowerCase()
+    );
 
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      const { count } = docSnap.data();
-      await setDoc(docRef, { count: count + 1 });
+      const { count, imageUrl } = docSnap.data();
+      await setDoc(docRef, { count: count + newItemQuantity, imageUrl });
     } else {
-      await setDoc(docRef, { count: 1 });
       // Fetch image for new ingredient
-      await fetchIngredientImage(item.toLowerCase());
+      const imageUrl = await fetchIngredientImage(newItemName.toLowerCase());
+      await setDoc(docRef, { count: newItemQuantity, imageUrl });
     }
     await updatePantry();
-    setItemName("");
+    setNewItemName("");
+    setNewItemQuantity(1);
     setOpen(false);
   };
 
@@ -174,15 +189,83 @@ export default function Home() {
       );
       if (response.ok) {
         const data = await response.json();
-        setIngredientImage((prevState) => ({
-          ...prevState,
-          [ingredient]: data.imageUrl,
-        }));
-        console.log(data.imageUrl);
+        return data.imageUrl;
       }
     } catch (error) {
       console.error("Error fetching ingredient image:", error);
     }
+    return null;
+  };
+
+  const cancelEdit = () => {
+    setEditItem(null);
+  };
+
+  const saveEdit = async () => {
+    if (!editItem) return;
+
+    // Check if new name already exists
+    if (editItem.name !== editItem.originalName) {
+      const existingItem = pantry.find(
+        (item) => item.name.toLowerCase() === editItem.name.toLowerCase()
+      );
+      if (existingItem) {
+        alert("An ingredient with this name already exists.");
+        return;
+      }
+    }
+
+    // Remove old item
+    await removeItem(editItem.originalName);
+
+    // Add new item
+    const docRef = doc(
+      collection(firestore, "pantry"),
+      editItem.name.toLowerCase()
+    );
+    await setDoc(docRef, { count: editItem.count });
+
+    // Fetch new image if name changed
+    if (editItem.name !== editItem.originalName) {
+      await fetchIngredientImage(editItem.name.toLowerCase());
+    }
+
+    await updatePantry();
+    setEditItem(null);
+  };
+
+  const adjustQuantity = (item, amount) => {
+    const newCount = Math.max(0, item.count + amount);
+    setEditItem({ ...item, count: newCount });
+  };
+
+  const handleSaveEdit = async (originalName, newName, newCount) => {
+    if (originalName.toLowerCase() !== newName.toLowerCase()) {
+      const existingItem = pantry.find(
+        (item) => item.name.toLowerCase() === newName.toLowerCase()
+      );
+      if (existingItem) {
+        alert("An ingredient with this name already exists.");
+        return;
+      }
+    }
+
+    // Remove old item
+    await removeItem(originalName);
+
+    // Add new item
+    const docRef = doc(collection(firestore, "pantry"), newName.toLowerCase());
+    let imageUrl = pantry.find(
+      (item) => item.name.toLowerCase() === originalName.toLowerCase()
+    )?.imageUrl;
+
+    if (originalName.toLowerCase() !== newName.toLowerCase()) {
+      imageUrl = await fetchIngredientImage(newName.toLowerCase());
+    }
+
+    await setDoc(docRef, { count: newCount, imageUrl });
+
+    await updatePantry();
   };
 
   useEffect(() => {
@@ -220,39 +303,74 @@ export default function Home() {
       </AppBar>
       <Container maxWidth="lg" sx={{ mt: 4 }}>
         <Grid container spacing={2}>
-          {pantry.map(({ name, count }) => (
+          {pantry.map(({ name, count, imageUrl }) => (
             <Grid item xs={12} sm={6} md={4} lg={3} key={name}>
-              <StyledCard>
-                {ingredientImage[name] && (
-                  <CardMedia
-                    component="img"
-                    height="140"
-                    image={ingredientImage[name]}
-                    alt={name}
-                  />
-                )}
-                <CardContent>
-                  <Typography variant="h6" component="div">
-                    {name.charAt(0).toUpperCase() + name.slice(1)}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Quantity: {count}
-                  </Typography>
-                </CardContent>
-                <CardActions>
-                  <IconButton
-                    edge="end"
-                    aria-label="delete"
-                    onClick={() => removeItem(name)}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </CardActions>
-              </StyledCard>
+              <IngredientCard
+                name={name}
+                count={count}
+                image={imageUrl}
+                onSave={handleSaveEdit}
+                onDelete={() => removeItem(name)}
+              />
             </Grid>
           ))}
         </Grid>
       </Container>
+      <StyledModal
+        open={editItem !== null}
+        onClose={cancelEdit}
+        aria-labelledby="edit-item-modal"
+      >
+        <ModalContent>
+          <Typography variant="h6" component="h2" gutterBottom>
+            Edit Item
+          </Typography>
+          {editItem && (
+            <>
+              <TextField
+                autoFocus
+                margin="dense"
+                id="edit-name"
+                label="Item Name"
+                type="text"
+                fullWidth
+                variant="outlined"
+                value={editItem.name}
+                onChange={(e) =>
+                  setEditItem({ ...editItem, name: e.target.value })
+                }
+              />
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  mt: 2,
+                }}
+              >
+                <IconButton
+                  onClick={() => adjustQuantity(editItem, -1)}
+                  disabled={editItem.count <= 0}
+                >
+                  <RemoveCircleOutlineIcon />
+                </IconButton>
+                <Typography variant="h6" component="div" sx={{ mx: 2 }}>
+                  {editItem.count}
+                </Typography>
+                <IconButton onClick={() => adjustQuantity(editItem, 1)}>
+                  <AddCircleOutlineIcon />
+                </IconButton>
+              </Box>
+              <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
+                <Button onClick={cancelEdit}>Cancel</Button>
+                <Button onClick={saveEdit} variant="contained" sx={{ ml: 1 }}>
+                  Save
+                </Button>
+              </Box>
+            </>
+          )}
+        </ModalContent>
+      </StyledModal>
       <StyledModal
         open={open}
         onClose={() => setOpen(false)}
@@ -270,16 +388,25 @@ export default function Home() {
             type="text"
             fullWidth
             variant="outlined"
-            value={itemName}
-            onChange={(e) => setItemName(e.target.value)}
+            value={newItemName}
+            onChange={(e) => setNewItemName(e.target.value)}
+          />
+          <TextField
+            margin="dense"
+            id="quantity"
+            label="Quantity"
+            type="number"
+            fullWidth
+            variant="outlined"
+            value={newItemQuantity}
+            onChange={(e) =>
+              setNewItemQuantity(Math.max(1, parseInt(e.target.value) || 1))
+            }
+            InputProps={{ inputProps: { min: 1 } }}
           />
           <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
             <Button onClick={() => setOpen(false)}>Cancel</Button>
-            <Button
-              onClick={() => addItem(itemName)}
-              variant="contained"
-              sx={{ ml: 1 }}
-            >
+            <Button onClick={addItem} variant="contained" sx={{ ml: 1 }}>
               Add
             </Button>
           </Box>
