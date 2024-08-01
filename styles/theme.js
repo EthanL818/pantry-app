@@ -3,31 +3,46 @@ import { createTheme } from "@mui/material/styles";
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#1976d2", // You can customize this color
+      main: "#2E8B57", // Sea Green
+      light: "#3CB371", // Medium Sea Green
+      dark: "#006400", // Dark Green
     },
     secondary: {
-      main: "#dc004e", // You can customize this color
+      main: "#FFA500", // Orange
     },
     background: {
-      default: "#ffffff",
-      paper: "#f5f5f5",
+      default: "#F0F8FF", // Alice Blue
+      paper: "#FFFFFF",
+    },
+    text: {
+      primary: "#333333",
+      secondary: "#666666",
     },
   },
   typography: {
-    fontFamily: [
-      "-apple-system",
-      "BlinkMacSystemFont",
-      '"Segoe UI"',
-      "Roboto",
-      '"Helvetica Neue"',
-      "Arial",
-      "sans-serif",
-      '"Apple Color Emoji"',
-      '"Segoe UI Emoji"',
-      '"Segoe UI Symbol"',
-    ].join(","),
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    h6: {
+      fontWeight: 600,
+    },
   },
-  // You can add more customizations here
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 20,
+          textTransform: "none",
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          borderRadius: 12,
+          boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+        },
+      },
+    },
+  },
 });
 
 export default theme;

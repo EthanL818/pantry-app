@@ -1,34 +1,48 @@
 import { useEffect, useState } from "react";
-import Layout from "../components/layout";
-import "../styles/globals.css";
 import { ThemeProvider } from "@mui/material/styles";
-import CssBaseline from "@mui/material/CssBaseline";
+import { CssBaseline } from "@mui/material";
 import theme from "../styles/theme";
+import { getCurrentUser } from "../firebase";
+import { useRouter } from "next/router";
 
-export default function MyApp({ Component, pageProps }) {
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    const jssStyles = document.querySelector("#jss-server-side");
-    if (jssStyles) {
-      jssStyles.parentElement.removeChild(jssStyles);
-    }
-  }, []);
+function MyApp({ Component, pageProps }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    setIsClient(true);
-  }, []);
+    const checkUser = async () => {
+      try {
+        console.log("Checking user...");
+        const currentUser = await getCurrentUser();
+        console.log("Current user:", currentUser);
+        setUser(currentUser);
+        if (currentUser && router.pathname === "/") {
+          router.push("/home");
+        } else if (!currentUser && router.pathname !== "/") {
+          router.push("/");
+        }
+      } catch (error) {
+        console.error("Error checking user:", error);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (!isClient) {
-    return null;
+    checkUser();
+  }, [router]);
+
+  if (loading) {
+    return <div>Loading...</div>;
   }
 
   return (
     <ThemeProvider theme={theme}>
-      <Layout>
-        <CssBaseline />
-        <Component {...pageProps} />
-      </Layout>
+      <CssBaseline />
+      <Component {...pageProps} user={user} setUser={setUser} />
     </ThemeProvider>
   );
 }
+
+export default MyApp;

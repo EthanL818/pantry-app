@@ -25,7 +25,7 @@ const StyledCard = styled(Card)(({ theme }) => ({
 
 const CardMediaWrapper = styled(Box)({
   position: "relative",
-  paddingTop: "100%", // 1:1 Aspect Ratio
+  paddingTop: "100%",
 });
 
 const StyledCardMedia = styled(CardMedia)({
@@ -62,7 +62,10 @@ const IngredientCard = ({ name, count, image, onEdit, onDelete, onSave }) => {
       <CardMediaWrapper>
         <StyledCardMedia
           component="img"
-          image={image || "placeholder-image-url.jpg"}
+          image={
+            image ||
+            "https://www.electricianlicense.com/wp-content/uploads/2020/06/placeholder-img.jpg"
+          }
           alt={name}
         />
       </CardMediaWrapper>
@@ -70,10 +73,15 @@ const IngredientCard = ({ name, count, image, onEdit, onDelete, onSave }) => {
         {isEditing ? (
           <>
             <TextField
+              autoFocus
+              margin="dense"
+              id="edit-name"
+              label="Item Name"
+              type="text"
+              variant="outlined"
               fullWidth
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
-              margin="normal"
             />
             <Box
               sx={{

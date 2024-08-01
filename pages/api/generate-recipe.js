@@ -10,15 +10,19 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method Not Allowed" });
   }
 
-  const { ingredients } = req.body;
+  const { ingredients, additionalInput } = req.body;
 
   if (!ingredients || !Array.isArray(ingredients) || ingredients.length === 0) {
     return res.status(400).json({ error: "Invalid ingredients list" });
   }
 
-  const prompt = `Generate a simple recipe designed for students with little to no cooking knowledge using some or all of these ingredients: ${ingredients.join(
-    ", "
-  )}. You may assume they have simple ingredients such as oil, seasoning like salt and pepper, etc. Additionally, focus on creating cohesive, understandable recipes. DO NOT try and incorporate ingredients if they do not belong. 
+  const ingredientList = ingredients
+    .map(({ name, quantity }) => `${quantity} of ${name}`)
+    .join(", ");
+
+  const prompt = `Generate a simple recipe designed for students with little to no cooking knowledge using some or all of these ingredients: ${ingredientList}. 
+  You may assume they have simple ingredients such as oil, seasoning like salt and pepper, etc. Additionally, focus on creating cohesive, 
+  understandable recipes. DO NOT try and incorporate ingredients if they do not belong. Finally, the following is additional input to help guide the recipe generation: ${additionalInput}
   Format the response as follows:
 Recipe Name:
 Ingredients:
