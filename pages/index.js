@@ -107,7 +107,7 @@ export default function LandingPage({ setUser }) {
                   1. Input Your Ingredients
                 </Typography>
                 <Typography align="center">
-                  Tell us what's in your pantry and fridge.
+                  {"Tell us what's in your pantry and fridge."}
                 </Typography>
               </Paper>
             </Grid>
@@ -129,7 +129,7 @@ export default function LandingPage({ setUser }) {
                   2. Get Recipes
                 </Typography>
                 <Typography align="center">
-                  We'll suggest easy, student-friendly recipes.
+                  {"We'll suggest easy, student-friendly recipes."}
                 </Typography>
               </Paper>
             </Grid>

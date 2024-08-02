@@ -309,7 +309,9 @@ export default function Home({ setUser }) {
         </Typography>
         {pantry.length === 0 && (
           <Typography variant="body1" color="textSecondary">
-            Your pantry is empty. Click the "Add Item" button to get started!
+            {
+              'Your pantry is empty. Click the "Add Item" button to get started!'
+            }
           </Typography>
         )}
         <Grid container spacing={3}>
