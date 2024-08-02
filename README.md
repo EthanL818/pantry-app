@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# RecipeCrafter
+
+RecipeCrafter is a web application that helps you manage your pantry and generate recipes based on the ingredients you have on hand. With RecipeCrafter, you can easily keep track of your pantry items and get creative recipe ideas tailored to your available ingredients and preferences.
+
+## Features
+
+- **Pantry Management**: Add, edit, and remove items from your digital pantry.
+- **Recipe Generation**: Generate recipes based on your pantry items and additional preferences.
+- **User Authentication**: Secure user accounts with Firebase authentication.
+- **Responsive Design**: Built with Material-UI for a clean, modern, and mobile-friendly interface.
+- **Image Integration**: Automatically fetch and display images for pantry items.
+
+## Technologies Used
+
+- Next.js
+- React
+- Firebase (Firestore for database, Authentication)
+- Material-UI
+- React Markdown
 
 ## Getting Started
 
-First, run the development server:
+1. Clone the repository:
+   ```
+   git clone https://github.com/yourusername/recipecrafter.git
+   ```
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+2. Install dependencies:
+   ```
+   cd recipecrafter
+   npm install
+   ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. Set up Firebase:
+   - Create a Firebase project at [https://console.firebase.google.com/](https://console.firebase.google.com/)
+   - Enable Firestore and Authentication services
+   - Add your Firebase configuration to the project
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+4. Set up environment variables:
+   - Create a `.env.local` file in the root directory
+   - Add your Firebase configuration and any other necessary API keys
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+5. Run the development server:
+   ```
+   npm run dev
+   ```
 
-## Learn More
+6. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
-To learn more about Next.js, take a look at the following resources:
+## Usage
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Sign up or log in to your account.
+2. Add items to your pantry using the "Add Item" button.
+3. Edit or remove pantry items as needed.
+4. Click "Generate Recipe" to get a recipe based on your pantry items.
+5. Add any additional preferences or dietary restrictions when prompted.
+6. View, copy, or save the generated recipe.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+## Contributing
 
-## Deploy on Vercel
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgements
+
+- [Next.js](https://nextjs.org/)
+- [React](https://reactjs.org/)
+- [Firebase](https://firebase.google.com/)
+- [Material-UI](https://material-ui.com/)
+- [React Markdown](https://github.com/remarkjs/react-markdown)
