@@ -17,6 +17,8 @@ RecipeCrafter is a web application that helps you manage your pantry and generat
 - Firebase (Firestore for database, Authentication)
 - Material-UI
 - React Markdown
+- OpenAI API
+- Spoonacular API
 
 ## Getting Started
 
